@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { headerSx } from './Header.style.ts';
-import { WalletButton } from '../WalletButton/WalletButton.component.tsx';
+import { WalletButton } from './components/WalletButton/WalletButton.component.tsx';
 import { useState } from 'react';
 import { connectWallet, shortenAddress, signMessage } from './Header.utils.ts';
 
