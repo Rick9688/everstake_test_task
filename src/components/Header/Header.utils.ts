@@ -14,10 +14,11 @@ export const connectWallet = async (
       setWalletAddress(address);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        if ((error as never).code === 4001) {
+        const e = error as Error & { code?: number };
+        if (e.code === 4001) {
           alert('You must connect to MetaMask to proceed.');
         } else {
-          console.error('Error connecting to MetaMask:', error.message);
+          console.error('Error connecting to MetaMask:', e.message);
           alert('There was an error connecting to MetaMask. Please try again.');
         }
       } else {
