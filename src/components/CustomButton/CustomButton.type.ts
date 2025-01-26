@@ -1,4 +1,4 @@
-export type WalletButtonProps = {
+export type CustomButtonProps = {
   label: string;
   handleClick: () => void;
 };
