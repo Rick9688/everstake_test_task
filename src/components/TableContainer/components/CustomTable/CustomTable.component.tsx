@@ -1,108 +1,74 @@
-import { useEffect, useState } from 'react';
-import {
-  Box,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-} from '@mui/material';
-import { axiosInstance } from '../../../../api/axios.ts';
-import { cellSx, paginationContainerSx } from './CustomTable.style.ts';
-import { tableHeaders } from './CustomTable.utils.ts';
+import React, { useEffect, useState } from 'react';
+import { Box, Table, TableContainer, TablePagination } from '@mui/material';
 import { FilterPanel } from './components/FilterPanel/FilterPanel.component.tsx';
-import { ValidatorType } from './CustomTable.types.ts';
-import { CustomTableRow } from './components/CustomTableRow/CustomTableRow.component.tsx';
+import { CustomTableHead } from './components/CustomTableHead/CustomTableHead.component';
+import { TableDataType } from './CustomTable.types';
+import { Loader } from '../../../Loader/Loader.component';
+import { CustomTableBody } from './components/CustomTableBody/CustomTableBody.component';
+import { getEthPrice, getStats } from '../../../../api/apiTable';
 
-export const CustomTable = () => {
-  const [validators, setValidators] = useState<ValidatorType[]>([]);
+export const CustomTable: React.FC = () => {
+  const [tableData, setTableData] = useState<TableDataType[]>([]);
   const [ethPrice, setEthPrice] = useState(0);
-  const [sort_by, setSort_by] = useState('apr');
+  const [currentFilter, setCurrentFilter] = useState('apr');
+  const [count, setCount] = useState(0);
   const [page, setPage] = useState(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [rowsPerPage, _setRowsPerPage] = useState(7);
   const [isLoading, setIsLoading] = useState(false);
+  const rowsPerPage = 7;
+  const processedTableData = tableData;
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const ethPriceResponse = await axiosInstance.get('/historical/info');
-        setEthPrice(ethPriceResponse.data.eth_price.current);
-        const validatorsResponse = await axiosInstance.get('/entities/stats', {
-          params: { sort_by },
-        });
-        setValidators(validatorsResponse.data.items);
-        setIsLoading(false);
+        const fetchedEthPrice = await getEthPrice();
+        setEthPrice(fetchedEthPrice);
+        const fetchedStats = await getStats(currentFilter, page, rowsPerPage);
+        setTableData(fetchedStats.items);
+        setCount(fetchedStats.totalCount);
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
+
     fetchData();
-  }, [sort_by]);
+  }, [currentFilter, page]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
   const handleFilterChange = (param: string) => {
-    setSort_by(param);
+    setCurrentFilter(param);
   };
 
   return (
     <Box>
-      <FilterPanel filter={sort_by} onFilterChange={handleFilterChange} />
+      <FilterPanel filter={currentFilter} onFilterChange={handleFilterChange} />
       <TableContainer>
         <Table>
-          <TableHead>
-            <TableRow>
-              {tableHeaders.map((label, index) => (
-                <TableCell key={index} sx={cellSx}>
-                  {label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
+          <CustomTableHead />
           {isLoading ? (
-            <Box
-              width="100vw"
-              height="400px"
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <CircularProgress sx={{ color: '#FFFFFF' }} />
-            </Box>
+            <Loader />
           ) : (
-            <TableBody>
-              {validators
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((validator, index) => (
-                  <CustomTableRow
-                    key={index}
-                    validator={validator}
-                    index={index}
-                    ethPrice={ethPrice}
-                  />
-                ))}
-            </TableBody>
+            <CustomTableBody
+              tableData={processedTableData}
+              ethPrice={ethPrice}
+            />
           )}
         </Table>
       </TableContainer>
-      <Box sx={paginationContainerSx}>
-        <TablePagination
-          sx={{ color: '#FFFFFF' }}
-          component="div"
-          count={validators.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPageOptions={[7]}
-        />
-      </Box>
+      <TablePagination
+        sx={{ color: '#FFFFFF' }}
+        component="div"
+        count={count}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPageOptions={[7]}
+      />
     </Box>
   );
 };

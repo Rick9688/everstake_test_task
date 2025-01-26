@@ -1,4 +1,4 @@
-export type ValidatorType = {
+export type TableDataType = {
   name: string;
   staked: string;
   apr: number;
