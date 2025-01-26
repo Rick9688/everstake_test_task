@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Table, TableContainer, TablePagination } from '@mui/material';
+import { getEthPrice, getStats } from '../../../../api/apiTable';
+import { Loader } from '../../../Loader/Loader.component';
 import { FilterPanel } from './components/FilterPanel/FilterPanel.component.tsx';
 import { CustomTableHead } from './components/CustomTableHead/CustomTableHead.component';
-import { TableDataType } from './CustomTable.types';
-import { Loader } from '../../../Loader/Loader.component';
 import { CustomTableBody } from './components/CustomTableBody/CustomTableBody.component';
-import { getEthPrice, getStats } from '../../../../api/apiTable';
+import { TableDataType } from './CustomTable.types';
 
 export const CustomTable: React.FC = () => {
   const [tableData, setTableData] = useState<TableDataType[]>([]);
@@ -48,17 +48,17 @@ export const CustomTable: React.FC = () => {
     <Box>
       <FilterPanel filter={currentFilter} onFilterChange={handleFilterChange} />
       <TableContainer>
-        <Table>
-          <CustomTableHead />
-          {isLoading ? (
-            <Loader />
-          ) : (
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <Table>
+            <CustomTableHead />
             <CustomTableBody
               tableData={processedTableData}
               ethPrice={ethPrice}
             />
-          )}
-        </Table>
+          </Table>
+        )}
       </TableContainer>
       <TablePagination
         sx={{ color: '#FFFFFF' }}
