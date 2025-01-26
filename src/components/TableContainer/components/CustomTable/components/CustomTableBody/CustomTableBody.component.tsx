@@ -9,10 +9,10 @@ export const CustomTableBody: React.FC<CustomTableBodyProps> = ({
 }) => {
   return (
     <TableBody>
-      {tableData.map((validator, index) => (
+      {tableData.map((curency, index) => (
         <CustomTableRow
           key={index}
-          validator={validator}
+          row={curency}
           index={index}
           ethPrice={ethPrice}
         />

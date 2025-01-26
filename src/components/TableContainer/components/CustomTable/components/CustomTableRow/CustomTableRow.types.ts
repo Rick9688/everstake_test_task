@@ -1,7 +1,7 @@
-import { ValidatorType } from '../../CustomTable.types.ts';
+import { TableDataType } from '../../CustomTable.types.ts';
 
-export type ValidatorRowProps = {
-  validator: ValidatorType;
+export type RowProps = {
+  row: TableDataType;
   index: number;
   ethPrice: number;
 };
